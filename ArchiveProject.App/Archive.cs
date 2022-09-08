@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO.Compression;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime.ConstrainedExecution;
@@ -13,6 +14,7 @@ namespace ArchiveProject.App
 {
     internal class Archive
     {
+        private const string TEMP_FOLDER = "Source";
         private Models.ArchiveSettings _Settings;
 
         public Archive(Models.ArchiveSettings settings)
@@ -30,32 +32,38 @@ namespace ArchiveProject.App
             var filesToBeArchived = Directory.GetFiles(_Settings.SourcePath, "*.*", SearchOption.AllDirectories).ToList();
             var directoriesToBeArchived = Directory.GetDirectories(_Settings.SourcePath, "*.*", SearchOption.AllDirectories).ToList();
 
-            if (Directory.Exists(_Settings.TargetPath))
+            var targetTempFolder = Path.Combine(_Settings.TargetPath, TEMP_FOLDER);
+
+            if (Directory.Exists(targetTempFolder))
             {
-                Directory.Delete(_Settings.TargetPath, true);
-                Directory.CreateDirectory(_Settings.TargetPath);
+                Directory.Delete(targetTempFolder, true);
             }
-            
+
+            Directory.CreateDirectory(targetTempFolder);
 
             RemoveIgnoredFiles(ref filesToBeArchived);
             RemoveIgnoredDirectories(ref directoriesToBeArchived);
 
             Parallel.ForEach(directoriesToBeArchived, dirPath =>
             {
-                var dirname = dirPath.Replace(_Settings.SourcePath, _Settings.TargetPath);
+                var dirname = dirPath.Replace(_Settings.SourcePath, targetTempFolder);
 
                 if (!Directory.Exists(dirname))
                 {
-                    Directory.CreateDirectory(dirPath.Replace(_Settings.SourcePath, _Settings.TargetPath));
+                    Directory.CreateDirectory(dirPath.Replace(_Settings.SourcePath, targetTempFolder));
                 }
             });
 
             Parallel.ForEach(filesToBeArchived, newPath =>
             {
-                File.Copy(newPath, newPath.Replace(_Settings.SourcePath, _Settings.TargetPath), true);
+                File.Copy(newPath, newPath.Replace(_Settings.SourcePath, targetTempFolder), true);
             });
 
+            var zipFileName = Path.Combine(_Settings.TargetPath,$"{new DirectoryInfo(_Settings.SourcePath).Name}-{DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss-ff")}.zip");
 
+            ZipFile.CreateFromDirectory(targetTempFolder, zipFileName);
+
+            Directory.Delete(targetTempFolder, true);
         }
 
         private void RemoveIgnoredFiles(ref List<string> toBeArchived)
