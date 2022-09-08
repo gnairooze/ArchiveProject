@@ -10,5 +10,13 @@ namespace ArchiveProject.App.Models
     {
         public string SourcePath { get; set; } = string.Empty;
         public string TargetPath { get; set; } = string.Empty;
+        public bool AttendedRun { get; set; } = false;
+
+        public List<string> IgnoreList { get; }
+
+        public ArchiveSettings()
+        {
+            IgnoreList = new List<string>();
+        }
     }
 }

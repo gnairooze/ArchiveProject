@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.ConstrainedExecution;
 using System.Security.Cryptography;
 using System.Text;
@@ -13,51 +14,83 @@ namespace ArchiveProject.App
     internal class Archive
     {
         private Models.ArchiveSettings _Settings;
-        private List<string> _IgnoreList;
-        public Archive(Models.ArchiveSettings settings, List<string> ignoreList)
+
+        public Archive(Models.ArchiveSettings settings)
         {
             if(settings == null)
             {
                 throw new ArgumentNullException("settings is null");
             }
 
-            if (ignoreList == null)
-            {
-                throw new ArgumentNullException("ignoreList is null");
-            }
-
             _Settings = settings;
-            _IgnoreList = ignoreList;
         }
 
         public void Run()
         {
-            var filesToBeArchived = Directory.GetFiles(_Settings.SourcePath).ToList();
+            var filesToBeArchived = Directory.GetFiles(_Settings.SourcePath, "*.*", SearchOption.AllDirectories).ToList();
+            var directoriesToBeArchived = Directory.GetDirectories(_Settings.SourcePath, "*.*", SearchOption.AllDirectories).ToList();
 
-            //process ignore list and remove match files in files to be archived
-            ProcessFilesToBeArchived(filesToBeArchived);
-
-            foreach (var file in filesToBeArchived)
+            if (Directory.Exists(_Settings.TargetPath))
             {
-                File.Copy(file, Path.Combine(_Settings.TargetPath, new FileInfo(file).Name));
+                Directory.Delete(_Settings.TargetPath, true);
+                Directory.CreateDirectory(_Settings.TargetPath);
             }
+            
+
+            RemoveIgnoredFiles(ref filesToBeArchived);
+            RemoveIgnoredDirectories(ref directoriesToBeArchived);
+
+            Parallel.ForEach(directoriesToBeArchived, dirPath =>
+            {
+                var dirname = dirPath.Replace(_Settings.SourcePath, _Settings.TargetPath);
+
+                if (!Directory.Exists(dirname))
+                {
+                    Directory.CreateDirectory(dirPath.Replace(_Settings.SourcePath, _Settings.TargetPath));
+                }
+            });
+
+            Parallel.ForEach(filesToBeArchived, newPath =>
+            {
+                File.Copy(newPath, newPath.Replace(_Settings.SourcePath, _Settings.TargetPath), true);
+            });
+
+
         }
 
-        private void ProcessFilesToBeArchived(List<string> filesToBeArchived)
+        private void RemoveIgnoredFiles(ref List<string> toBeArchived)
         {
-            if(_IgnoreList == null || _IgnoreList.Count == 0)
+            if(_Settings.IgnoreList.Count == 0)
             {
                 return;
             }
 
-            foreach (var pattern in _IgnoreList)
+            foreach (var pattern in _Settings.IgnoreList)
             {
-                var matchedFiles = (from file in filesToBeArchived
-                            where Regex.IsMatch(file, pattern)
+                var matchedFiles = (from file in toBeArchived
+                            where file.IndexOf($"\\{pattern}\\") >= 0
                             select file).ToList();
 
-                filesToBeArchived = filesToBeArchived.Except(matchedFiles).ToList();
+                toBeArchived = toBeArchived.Except(matchedFiles).ToList();
             }
         }
+
+        private void RemoveIgnoredDirectories(ref List<string> toBeArchived)
+        {
+            if (_Settings.IgnoreList.Count == 0)
+            {
+                return;
+            }
+
+            foreach (var pattern in _Settings.IgnoreList)
+            {
+                var matchedFiles = (from file in toBeArchived
+                                    where file.IndexOf($"\\{pattern}") >= 0
+                                    select file).ToList();
+
+                toBeArchived = toBeArchived.Except(matchedFiles).ToList();
+            }
+        }
+
     }
 }

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ArchiveProject.App": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Repos\\github\\Open-Xml-PowerTools"
+    }
+  }
+}

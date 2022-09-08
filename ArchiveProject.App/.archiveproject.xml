@@ -1,0 +1,10 @@
+﻿<configuration>
+	<targetPath>c:\temp\archive</targetPath>
+	<attendedRun>true</attendedRun>
+	<ignoreList>
+		<ignore>bin</ignore>
+		<ignore>obj</ignore>
+		<ignore>.git</ignore>
+		<ignore>.vs</ignore>
+	</ignoreList>
+</configuration>
