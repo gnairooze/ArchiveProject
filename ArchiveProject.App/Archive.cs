@@ -93,11 +93,13 @@ namespace ArchiveProject.App
             foreach (var pattern in _Settings.IgnoreList)
             {
                 var matchedFiles = (from file in toBeArchived
-                                    where file.IndexOf($"\\{pattern}") >= 0
+                                    where file.IndexOf($"\\{pattern}") >= 0 || file.IndexOf($"\\{pattern}\\") >= 0
                                     select file).ToList();
 
                 toBeArchived = toBeArchived.Except(matchedFiles).ToList();
             }
+
+
         }
 
     }

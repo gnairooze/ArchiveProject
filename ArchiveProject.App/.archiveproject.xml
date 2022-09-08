@@ -6,5 +6,7 @@
 		<ignore>obj</ignore>
 		<ignore>.git</ignore>
 		<ignore>.vs</ignore>
-	</ignoreList>
+    <ignore>node_modules</ignore>
+    <ignore>packages</ignore>
+  </ignoreList>
 </configuration>
