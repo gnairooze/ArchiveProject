@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.ConstrainedExecution;
+using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ArchiveProject.App
@@ -28,30 +32,32 @@ namespace ArchiveProject.App
 
         public void Run()
         {
-            var filesToBeArchived = Directory.GetFiles(_Settings.SourcePath);
+            var filesToBeArchived = Directory.GetFiles(_Settings.SourcePath).ToList();
 
             //process ignore list and remove match files in files to be archived
             ProcessFilesToBeArchived(filesToBeArchived);
 
             foreach (var file in filesToBeArchived)
             {
-                File.Copy(file, Path.Combine(_Settings.TargetPath, GetFileNameOnly(file)));
+                File.Copy(file, Path.Combine(_Settings.TargetPath, new FileInfo(file).Name));
             }
         }
 
-        private void ProcessFilesToBeArchived(string[] filesToBeArchived)
+        private void ProcessFilesToBeArchived(List<string> filesToBeArchived)
         {
             if(_IgnoreList == null || _IgnoreList.Count == 0)
             {
                 return;
             }
 
+            foreach (var pattern in _IgnoreList)
+            {
+                var matchedFiles = (from file in filesToBeArchived
+                            where Regex.IsMatch(file, pattern)
+                            select file).ToList();
 
-        }
-
-        private string GetFileNameOnly(string FullPath)
-        {
-            return new FileInfo(FullPath).Name;
+                filesToBeArchived = filesToBeArchived.Except(matchedFiles).ToList();
+            }
         }
     }
 }
