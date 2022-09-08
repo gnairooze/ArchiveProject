@@ -23,6 +23,7 @@ if (_Helper.Settings.AttendedRun)
     }
 }
 
+Console.WriteLine("operation started");
 Archive manager = new Archive(_Helper.Settings);
 manager.Run();
 
