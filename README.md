@@ -30,4 +30,4 @@ It uses a configuration file in the source folder to carry the path to the targe
 ArchiveProject.App "full path to the source folder"
 ```
 
-To run the command from any path, you can "fullpath\ArchiveProject.App.exe" to the user or system environment variable "Path".
+To run the command from any path, add "fullpath\ArchiveProject.App.exe" to the user or system environment variable "Path".
