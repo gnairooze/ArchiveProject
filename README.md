@@ -4,11 +4,13 @@ Archive folder by copying files and subfolders of a source folder to a target fo
 
 It uses a configuration file in the source folder to carry the path to the target folder, ignored subfolders list, whether or not to show a confirmation message.
 
-## Sample Configuration
+## Sample
+
+### Configuration
 
 ```xml
 <configuration>
-	<targetPath>f:\Data\My Projects\mssql-random</targetPath>
+	<targetPath>full path to the target folder</targetPath>
 	<attendedRun>false</attendedRun>
 	<ignoreList>
 		<ignore>bin</ignore>
@@ -21,3 +23,11 @@ It uses a configuration file in the source folder to carry the path to the targe
 	</ignoreList>
 </configuration>
 ```
+
+### Command Line
+
+```cmd
+ArchiveProject.App "full path to the source folder"
+```
+
+To run the command from any path, you can "fullpath\ArchiveProject.App.exe" to the user or system environment variable "Path".
