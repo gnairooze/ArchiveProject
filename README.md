@@ -16,6 +16,8 @@ It uses a configuration file in the source folder to carry the path to the targe
 		<ignore>.git</ignore>
 		<ignore>.vs</ignore>
 		<ignore>node_modules</ignore>
+		<ignore>packages</ignore>
+		<ignore>.jekyll-cache</ignore>
 	</ignoreList>
 </configuration>
 ```
